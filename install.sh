@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Remnawave Node — one-shot installer
+# Remnawave Node — one-shot installer (private repo, key embedded)
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh -o /tmp/remna-install.sh \
-#     && sudo bash /tmp/remna-install.sh
+#   curl -fsSL -H "Authorization: Bearer <PAT>" \
+#     https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh \
+#     -o /tmp/remna-install.sh && sudo bash /tmp/remna-install.sh
 #
-# Optional environment variables (skip prompts):
-#   sudo NODE_PORT=2222 SECRET_KEY="eyJ..." bash /tmp/remna-install.sh
+# Optional override:
 #   INSTALL_DIR=/opt/remnanode  (default)
+#   NODE_PORT and SECRET_KEY env vars override the embedded constants below.
 
 set -euo pipefail
 
@@ -39,22 +40,12 @@ if [[ -r /etc/os-release ]]; then
     esac
 fi
 
+# -----------------------------------------------------------------------------
+# Embedded constants (override via env vars if needed)
+# -----------------------------------------------------------------------------
 INSTALL_DIR="${INSTALL_DIR:-/opt/remnanode}"
-NODE_PORT="${NODE_PORT:-}"
-SECRET_KEY="${SECRET_KEY:-}"
-
-# -----------------------------------------------------------------------------
-# Interactive input (only if not pre-set via env)
-# -----------------------------------------------------------------------------
-TTY=/dev/tty
-if [[ ! -r ${TTY} ]]; then
-    TTY=/dev/stdin
-fi
-
-if [[ -z ${NODE_PORT} ]]; then
-    read -rp "NODE_PORT [2222]: " NODE_PORT <"${TTY}" || true
-    NODE_PORT="${NODE_PORT:-2222}"
-fi
+NODE_PORT="${NODE_PORT:-2222}"
+SECRET_KEY="${SECRET_KEY:-eyJub2RlQ2VydFBlbSI6Ii0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLVxuTUlJQmVUQ0NBUitnQXdJQkFnSUhBWGR5RlNja1ZEQUtCZ2dxaGtqT1BRUURBakFvTVNZd0pBWURWUVFERXgxNlxuVUVSNlMzWmtkMWQyVmxCMExWWlZOMjVZYjNSa2JuQlZjMlU0TkRBZUZ3MHlOakEwTWpZeE5EVTBNekphRncweVxuT1RBME1qWXhORFUwTXpKYU1DUXhJakFnQmdOVkJBTVRHVWMzYURNM1FraHRTbUpHTVZWSFZFZE1VblZtZEdaa1xuVWtzd1dUQVRCZ2NxaGtqT1BRSUJCZ2dxaGtqT1BRTUJCd05DQUFRdFJxQ0NkaWRNNXYweFU5WUFFdlVsVlNxZlxuam9HVEc4MmpRcGxENklrcUpzVWZ1MXdHN3YrbUp4TmhKR2kzZWFhSlJuZGZFZnpqN3MxdU1tYkk4WmVJb3pnd1xuTmpBTUJnTlZIUk1CQWY4RUFqQUFNQTRHQTFVZER3RUIvd1FFQXdJRm9EQVdCZ05WSFNVQkFmOEVEREFLQmdnclxuQmdFRkJRY0RBVEFLQmdncWhrak9QUVFEQWdOSUFEQkZBaUE5RjRFOWFLOWxtV2hIRmQxRU1KSnpVTHBPTldUOVxuZlVRaXVFa2thMlg0L2dJaEFNN2ZDOSsyNWc1ZFM3WUt2bEF2NEhBVUFISlJGRzh0aFUxVFlvczBqV0owXG4tLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tIiwibm9kZUtleVBlbSI6Ii0tLS0tQkVHSU4gUFJJVkFURSBLRVktLS0tLVxuTUlHSEFnRUFNQk1HQnlxR1NNNDlBZ0VHQ0NxR1NNNDlBd0VIQkcwd2F3SUJBUVFnRXlQZkpQYWtSZ1VkWmlIWlxub2kvdEF2MDRuQmNjbno3Vng5WTk3ZStpMUJlaFJBTkNBQVF0UnFDQ2RpZE01djB4VTlZQUV2VWxWU3Fmam9HVFxuRzgyalFwbEQ2SWtxSnNVZnUxd0c3dittSnhOaEpHaTNlYWFKUm5kZkVmemo3czF1TW1iSThaZUlcbi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0iLCJjYUNlcnRQZW0iOiItLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS1cbk1JSUJZVENDQVFpZ0F3SUJBZ0lCQVRBS0JnZ3Foa2pPUFFRREFqQW9NU1l3SkFZRFZRUURFeDE2VUVSNlMzWmtcbmQxZDJWbEIwTFZaVk4yNVliM1JrYm5CVmMyVTROREFlRncweU5qQXpNakl3TnpBME1UTmFGdzB6TmpBek1qSXdcbk56QTBNVE5hTUNneEpqQWtCZ05WQkFNVEhYcFFSSHBMZG1SM1YzWldVSFF0VmxVM2JsaHZkR1J1Y0ZWelpUZzBcbk1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRTcyLzdqZ2VyYlNwQmIxbzF5aWVLeEpLUXdIdzZcbklEdGxOdysvWlc5VXhjeW12WG81VkVTQVk0NFkxbmRwT1NEbDBSV3BoMlRjYlpubTkrcW5EU2tMQnFNak1DRXdcbkR3WURWUjBUQVFIL0JBVXdBd0VCL3pBT0JnTlZIUThCQWY4RUJBTUNBb1F3Q2dZSUtvWkl6ajBFQXdJRFJ3QXdcblJBSWdFMjZraThhSUtEdVFBaWR0SFF1NW1wS2VXWkYyYWIrcHN5aE9TM0NlNXI4Q0lGRFdldkhSa09YNDBIUkxcbmJ5ZGFnT1F5a3lsMFJoWmhLeXpKUHNuUVBxaVdcbi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0iLCJqd3RQdWJsaWNLZXkiOiItLS0tLUJFR0lOIFBVQkxJQyBLRVktLS0tLVxuTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF0Nms5Z1ZFUGhNUlZNOTRQc1hKWlxuSHZKRVo2dnBTWjJFd3Y3NVJseHZ6UndEdzl6MFZORjcxMDZ5cjkxR0J3bVQ2eFBvRXhGdHo1cDNnQzJQZWtWVVxuaTJYSGg4Nm9ic3daZ1BkNUsyRDNnQmVlcUNzdkJEYWtVa0wwalN6UDFJR25sRHBUYzdPQ29CN1pRek5DZ2JBdFxueE16VVNTVG9jRFRXVGtuSzJROEhOM1Jhcm56Q0pnQ1hOMXBUSUdrakIxWUxhMU4vQS8xTzBaelhvUWdCZk1WU1xucmpObVlRT0dRTzY4RTV4eTljRlBDYTBRb3E1RlV0SXlZcDNpaVliMVByUHlBSFQrUEVGRmVQa0VDdi85RlVhYVxuR0M3YmdtUnRURFYzYkUzd1lIcEdCdzZIa0djSWhRNjFmM1B0MmxZZlR5Q1dRWnQyU2FYTU5hTGxaNUhTUkdwL1xuK3dJREFRQUJcbi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLVxuIn0=}"
 
 if ! [[ ${NODE_PORT} =~ ^[0-9]+$ ]] || (( NODE_PORT < 1 || NODE_PORT > 65535 )); then
     err "Некорректный NODE_PORT: ${NODE_PORT}"
@@ -62,20 +53,7 @@ if ! [[ ${NODE_PORT} =~ ^[0-9]+$ ]] || (( NODE_PORT < 1 || NODE_PORT > 65535 ));
 fi
 
 if [[ -z ${SECRET_KEY} ]]; then
-    echo
-    echo "Вставьте SECRET_KEY (значение из docker-compose, всё что внутри кавычек после"
-    echo "  - SECRET_KEY=\"...\"  ) и нажмите Enter."
-    echo "Ввод скрыт."
-    read -rs SECRET_KEY <"${TTY}" || true
-    echo
-fi
-
-# Strip optional surrounding double-quotes (panel sometimes copies them)
-SECRET_KEY="${SECRET_KEY%\"}"
-SECRET_KEY="${SECRET_KEY#\"}"
-
-if [[ -z ${SECRET_KEY} ]]; then
-    err "SECRET_KEY пуст. Прерываю."
+    err "SECRET_KEY пуст."
     exit 1
 fi
 

@@ -1,64 +1,60 @@
 # Remnawave Node — установка одной командой
 
+Приватный репо со встроенным `SECRET_KEY` для конкретной ноды.
 Скрипт автоматически:
 
 1. Устанавливает Docker (если его нет) через официальный `get.docker.com`.
-2. Спрашивает `NODE_PORT` (по умолчанию `2222`) и `SECRET_KEY` (значение из панели Remnawave).
-3. Создаёт `/opt/remnanode/docker-compose.yml` с правами `600`.
-4. Подтягивает образ `remnawave/node:latest` и запускает контейнер.
+2. Создаёт `/opt/remnanode/docker-compose.yml` с `NODE_PORT=2222` и встроенным `SECRET_KEY` (права `600`).
+3. Подтягивает образ `remnawave/node:latest` и запускает контейнер.
+
+Никаких промптов — полностью неинтерактивно.
 
 ## Установка
 
-Скачайте скрипт и запустите его (нужны права root):
+Замените `<PAT>` на ваш fine-grained Personal Access Token, выпущенный на этот репо:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh -o /tmp/remna-install.sh \
-  && sudo bash /tmp/remna-install.sh
+curl -fsSL -H "Authorization: Bearer <PAT>" \
+  https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh \
+  -o /tmp/remna-install.sh && sudo bash /tmp/remna-install.sh
 ```
 
-> Если `sudo` не нужен (вы уже root), уберите его. Не используйте
-> `curl ... | bash` — скрипт не сможет прочитать ввод (порт и SECRET_KEY) со stdin.
+Если уже под root, `sudo` можно убрать.
 
-### Где взять `SECRET_KEY`
+## Создание PAT
 
-В панели Remnawave: **Nodes → Management → + (создать ноду) → Copy docker-compose.yml**.
-В скопированном compose найдите строку:
+1. https://github.com/settings/personal-access-tokens/new
+2. Token name: любое (например, `remna-node-installer`)
+3. Resource owner: `Friizers`
+4. Repository access: **Only select repositories** → `remna-node`
+5. Permissions → Repository permissions → **Contents: Read-only**
+6. Generate token, сохраните в менеджере паролей.
 
-```yaml
-      - SECRET_KEY="eyJ..."
-```
+Токен переиспользуете на всех нодах с этим SECRET_KEY.
 
-Значение внутри кавычек — это и есть `SECRET_KEY`. Кавычки можно оставить или убрать,
-скрипт их сам отрежет.
-
-## Неинтерактивная установка
-
-Можно передать всё через переменные окружения и не отвечать на вопросы:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh -o /tmp/remna-install.sh \
-  && sudo NODE_PORT=2222 SECRET_KEY='eyJ...' bash /tmp/remna-install.sh
-```
-
-## Что после установки
+## После установки
 
 ```bash
 cd /opt/remnanode
-docker compose logs -f -t          # логи
-docker compose restart             # рестарт
-docker compose pull && docker compose up -d   # обновление до latest
-docker compose down                # остановить
+docker compose logs -f -t                          # логи
+docker compose restart                             # рестарт
+docker compose pull && docker compose up -d        # обновление
+docker compose down                                # остановить
 ```
 
-В панели Remnawave: на карточке создаваемой ноды нажмите **Next → выберите Config Profile → Create**.
+В панели Remnawave: на карточке создаваемой ноды нажмите **Next → Config Profile → Create**.
 
 ## Безопасность
 
-- Закройте `NODE_PORT` (по умолчанию `2222`) в файрволе ноды, оставив доступ только с IP панели.
-- Файл `/opt/remnanode/docker-compose.yml` создаётся с правами `600` (читать может только root),
-  потому что в нём лежит `SECRET_KEY`.
+- **Закройте `2222` в файрволе ноды**, оставив доступ только с IP панели.
+- В `/opt/remnanode/docker-compose.yml` лежит SECRET_KEY → файл создаётся с правами `600`.
+- При утечке PAT любой сможет вытащить SECRET_KEY из репо. PAT можно отозвать
+  на https://github.com/settings/personal-access-tokens и выпустить новый.
 
-## Поддерживаемые ОС
+## Если нужно поменять SECRET_KEY или порт
 
-Тестировалось на Ubuntu 22.04/24.04 и Debian 12. На других дистрибутивах скрипт сработает,
-если на них устанавливается официальный Docker через `get.docker.com`.
+Редактируйте `install.sh` в репо (или передайте через env var на лету):
+
+```bash
+sudo NODE_PORT=2333 SECRET_KEY='другой_ключ' bash /tmp/remna-install.sh
+```
