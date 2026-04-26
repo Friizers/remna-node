@@ -9,12 +9,15 @@
 
 ## Установка
 
+Скачайте скрипт и запустите его (нужны права root):
+
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh)
+curl -fsSL https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh -o /tmp/remna-install.sh \
+  && sudo bash /tmp/remna-install.sh
 ```
 
-> Используйте именно `bash <(curl ...)`, а не `curl ... | bash` — иначе скрипт не сможет
-> прочитать ввод с клавиатуры (порт и SECRET_KEY).
+> Если `sudo` не нужен (вы уже root), уберите его. Не используйте
+> `curl ... | bash` — скрипт не сможет прочитать ввод (порт и SECRET_KEY) со stdin.
 
 ### Где взять `SECRET_KEY`
 
@@ -33,8 +36,8 @@ sudo bash <(curl -fsSL https://raw.githubusercontent.com/Friizers/remna-node/mai
 Можно передать всё через переменные окружения и не отвечать на вопросы:
 
 ```bash
-sudo NODE_PORT=2222 SECRET_KEY='eyJ...' \
-  bash <(curl -fsSL https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh)
+curl -fsSL https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh -o /tmp/remna-install.sh \
+  && sudo NODE_PORT=2222 SECRET_KEY='eyJ...' bash /tmp/remna-install.sh
 ```
 
 ## Что после установки

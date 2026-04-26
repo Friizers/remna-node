@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Remnawave Node — one-shot installer
 # Usage:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh)
+#   curl -fsSL https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh -o /tmp/remna-install.sh \
+#     && sudo bash /tmp/remna-install.sh
 #
 # Optional environment variables (skip prompts):
-#   NODE_PORT=2222 SECRET_KEY="eyJ..." bash <(curl -fsSL ...)
+#   sudo NODE_PORT=2222 SECRET_KEY="eyJ..." bash /tmp/remna-install.sh
 #   INSTALL_DIR=/opt/remnanode  (default)
 
 set -euo pipefail
@@ -23,7 +24,7 @@ err()   { printf "${RED}[ERROR]${NC} %s\n"   "$*" >&2; }
 # -----------------------------------------------------------------------------
 if [[ ${EUID} -ne 0 ]]; then
     err "Скрипт должен запускаться от root."
-    err "Запустите так:  sudo bash <(curl -fsSL https://raw.githubusercontent.com/Friizers/remna-node/main/install.sh)"
+    err "Запустите так:  sudo bash $0"
     exit 1
 fi
 
