@@ -1,0 +1,4 @@
+*.bak
+*.bak.*
+.env
+docker-compose.override.yml
